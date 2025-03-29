@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales - EnergyPro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">EnergyPro</a>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="customers.html">Customers</a></li>
+      <li><a href="sales.html" class="active">Sales</a></li>
+      <li><a href="billing.html">Billing</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+  
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>Sales Management</h1>
+    <p>Monitor and record all sales transactions.</p>
+  </header>
+  
+  <!-- Sales Table Section -->
+  <section class="sales-table-section">
+    <h2>Sales Transactions</h2>
+    <table class="sales-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Product</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Sample Sale Row 1 -->
+        <tr>
+          <td>1</td>
+          <td>John Doe</td>
+          <td>Solar Panel</td>
+          <td>2025-01-15</td>
+          <td>$5,000</td>
+          <td>Completed</td>
+          <td>
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
+          </td>
+        </tr>
+        <!-- Sample Sale Row 2 -->
+        <tr>
+          <td>2</td>
+          <td>Jane Smith</td>
+          <td>Crude Oil</td>
+          <td>2025-02-10</td>
+          <td>$7,500</td>
+          <td>Pending</td>
+          <td>
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
+          </td>
+        </tr>
+        <!-- Additional rows can be dynamically generated -->
+      </tbody>
+    </table>
+  </section>
+  
+  <!-- Add Sale Form Section -->
+  <section class="sale-form-section">
+    <h2>Add New Sale</h2>
+    <form id="addSaleForm">
+      <div class="form-group">
+        <label for="saleCustomer">Customer:</label>
+        <input type="text" id="saleCustomer" name="saleCustomer" placeholder="Enter customer name" required>
+      </div>
+      <div class="form-group">
+        <label for="saleProduct">Product:</label>
+        <input type="text" id="saleProduct" name="saleProduct" placeholder="Enter product name" required>
+      </div>
+      <div class="form-group">
+        <label for="saleDate">Date:</label>
+        <input type="date" id="saleDate" name="saleDate" required>
+      </div>
+      <div class="form-group">
+        <label for="saleAmount">Amount:</label>
+        <input type="number" step="0.01" id="saleAmount" name="saleAmount" placeholder="Enter sale amount" required>
+      </div>
+      <div class="form-group">
+        <label for="saleStatus">Status:</label>
+        <select id="saleStatus" name="saleStatus" required>
+          <option value="Completed">Completed</option>
+          <option value="Pending">Pending</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <button type="submit" class="cta-button">Add Sale</button>
+    </form>
+  </section>
+  
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 EnergyPro. All rights reserved.</p>
+  </footer>
+</body>
+</html>

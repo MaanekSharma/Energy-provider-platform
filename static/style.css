@@ -1,0 +1,287 @@
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #121212;
+  color: #fff;
+  line-height: 1.6;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Navigation Bar */
+.navbar {
+  background-color: #1f1f1f;
+  padding: 1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #2ecc71;
+}
+.navbar .logo {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #2ecc71;
+}
+.navbar ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+.navbar li {
+  margin-left: 1.5em;
+}
+.navbar a {
+  color: #fff;
+  transition: color 0.3s ease;
+}
+.navbar a:hover,
+.navbar a.active {
+  color: #2ecc71;
+}
+
+/* Hero Section */
+.hero {
+  padding: 3em 2em;
+  text-align: center;
+  background: linear-gradient(135deg, #1f1f1f, #121212);
+}
+.hero h1 {
+  font-size: 3em;
+  margin-bottom: 0.5em;
+  color: #2ecc71;
+}
+.hero p {
+  font-size: 1.2em;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.cta-button {
+  margin-top: 1.5em;
+  padding: 0.8em 1.5em;
+  background-color: #2ecc71;
+  border: none;
+  color: #121212;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+.cta-button:hover {
+  background-color: #27ae60;
+}
+
+/* Information Section */
+.info-section {
+  padding: 2em;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+.info-card {
+  background-color: #1f1f1f;
+  border: 1px solid #2ecc71;
+  border-radius: 8px;
+  padding: 1.5em;
+  margin: 1em;
+  width: calc(33% - 2em);
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+.info-card:hover {
+  transform: scale(1.05);
+}
+.info-card h3 {
+  margin-top: 0;
+  color: #2ecc71;
+}
+
+/* Page Header (for Customers Page) */
+.page-header {
+  text-align: center;
+  padding: 2em 1em;
+  background: #1f1f1f;
+  border-bottom: 1px solid #2ecc71;
+}
+.page-header h1 {
+  margin: 0;
+  color: #2ecc71;
+}
+.page-header p {
+  margin: 0.5em 0 0;
+}
+
+/* Customers Table Section */
+.customer-table-section {
+  padding: 2em;
+}
+.customer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+.customer-table th,
+.customer-table td {
+  border: 1px solid #2ecc71;
+  padding: 0.8em;
+  text-align: left;
+}
+.customer-table th {
+  background-color: #1f1f1f;
+  color: #2ecc71;
+}
+.customer-table tr:nth-child(even) {
+  background-color: #1f1f1f;
+}
+.customer-table tr:hover {
+  background-color: #2ecc71;
+  color: #121212;
+}
+
+/* Buttons for Customer Actions */
+.edit-btn, .delete-btn, .cta-button {
+  background-color: #2ecc71;
+  border: none;
+  padding: 0.5em 1em;
+  color: #121212;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+.edit-btn:hover, .delete-btn:hover, .cta-button:hover {
+  background-color: #27ae60;
+}
+
+/* Customer Form Section */
+.customer-form-section {
+  padding: 2em;
+  background-color: #1f1f1f;
+  margin: 2em 0;
+}
+.customer-form-section h2 {
+  color: #2ecc71;
+}
+.form-group {
+  margin-bottom: 1em;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+.form-group input {
+  width: 100%;
+  padding: 0.8em;
+  border: 1px solid #2ecc71;
+  border-radius: 4px;
+  background-color: #121212;
+  color: #fff;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #27ae60;
+}
+
+/* Footer */
+footer {
+  background-color: #1f1f1f;
+  text-align: center;
+  padding: 1em;
+  border-top: 2px solid #2ecc71;
+  margin-top: 2em;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .info-card {
+    width: calc(50% - 2em);
+  }
+}
+@media (max-width: 480px) {
+  .info-card {
+    width: 100%;
+  }
+  .navbar ul {
+    flex-direction: column;
+  }
+  .navbar li {
+    margin: 0.5em 0;
+  }
+}
+
+/* Sales Table Section */
+.sales-table-section {
+  padding: 2em;
+}
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+.sales-table th,
+.sales-table td {
+  border: 1px solid #2ecc71;
+  padding: 0.8em;
+  text-align: left;
+}
+.sales-table th {
+  background-color: #1f1f1f;
+  color: #2ecc71;
+}
+.sales-table tr:nth-child(even) {
+  background-color: #1f1f1f;
+}
+.sales-table tr:hover {
+  background-color: #2ecc71;
+  color: #121212;
+}
+
+/* Sale Form Section */
+.sale-form-section {
+  padding: 2em;
+  background-color: #1f1f1f;
+  margin: 2em 0;
+}
+.sale-form-section h2 {
+  color: #2ecc71;
+}
+
+/* Billing Table Section */
+.billing-table-section {
+  padding: 2em;
+}
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+.billing-table th,
+.billing-table td {
+  border: 1px solid #2ecc71;
+  padding: 0.8em;
+  text-align: left;
+}
+.billing-table th {
+  background-color: #1f1f1f;
+  color: #2ecc71;
+}
+.billing-table tr:nth-child(even) {
+  background-color: #1f1f1f;
+}
+.billing-table tr:hover {
+  background-color: #2ecc71;
+  color: #121212;
+}
+
+/* Billing Form Section */
+.billing-form-section {
+  padding: 2em;
+  background-color: #1f1f1f;
+  margin: 2em 0;
+}
+.billing-form-section h2 {
+  color: #2ecc71;
+}
+
