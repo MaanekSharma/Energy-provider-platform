@@ -13,7 +13,10 @@ public:
     void logEnergyUsage(int customer_id, int energy_type_id, const std::string& month, double units_used);
     void generateBill(int customer_id, double amount, const std::string& due_date, const std::string& status);
     void checkOverduePayments(const std::string& today);
+    sqlite3* getRawDB() const { return db; }
     void exec(const std::string& sql);
+    void generateFullBill(int customer_id, double amount, const std::string& due_date,
+        const std::string& paid_date, const std::string& status);
 
 
 private:

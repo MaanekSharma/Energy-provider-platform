@@ -7,17 +7,13 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Navigation Bar -->
-
   <div id="navbar-placeholder"></div>
   
-  <!-- Page Header -->
   <header class="page-header">
     <h1>Customer Management</h1>
     <p>Select an action below to manage customer records.</p>
   </header>
   
-  <!-- Action Form Section -->
   <section class="customer-action-section">
     <h2>Choose an Action</h2>
     <form id="customerActionForm">
@@ -34,7 +30,7 @@
           <option value="add">Add Customer</option>
         </select>
       </div>
-      <!-- Fields for filtering, lookup, etc. -->
+
       <div class="form-group" id="regionFilterField" style="display:none;">
         <label for="region">Region_ID:</label>
         <input type="number" id="region" name="region" placeholder="Enter region ID">
@@ -53,7 +49,7 @@
         <label for="balanceMax">Max Balance:</label>
         <input type="number" step="0.01" id="balanceMax" name="balanceMax" placeholder="Maximum balance">
       </div>
-      <!-- Fields for adding a customer -->
+
       <div class="form-group" id="addCustomerFields" style="display:none;">
         <label for="addName">Name:</label>
         <input type="text" id="addName" name="addName" placeholder="Enter customer name">
@@ -68,18 +64,15 @@
     </form>
   </section>
   
-  <!-- Results Section -->
   <section class="customer-results-section" style="display:none;">
     <h2>Results</h2>
     <div id="results"></div>
   </section>
   
-  <!-- Footer -->
   <footer>
     <p>&copy; 2025 EnergyPro. All rights reserved.</p>
   </footer>
-  
-  <!-- JavaScript for Interactive Functionality -->
+
   <script>
     const actionSelect = document.getElementById('actionType');
     const regionField = document.getElementById('regionFilterField');
@@ -91,7 +84,6 @@
     const resultsSection = document.querySelector('.customer-results-section');
     const resultsDiv = document.getElementById('results');
 
-    // Show/hide fields based on selected action
     actionSelect.addEventListener('change', function() {
       const action = actionSelect.value;
       regionField.style.display = (action === 'filter') ? 'block' : 'none';
@@ -101,7 +93,6 @@
       addCustomerFields.style.display = (action === 'add') ? 'block' : 'none';
     });
 
-    // Function to build an HTML table from JSON array data
     function buildTable(data) {
       if (!Array.isArray(data) || data.length === 0) {
         return "<p>No records found.</p>";
@@ -122,7 +113,6 @@
       return table;
     }
 
-    // Handle form submission
     form.addEventListener('submit', function(event) {
       event.preventDefault();
       resultsDiv.innerHTML = '';
@@ -131,7 +121,6 @@
       const action = actionSelect.value;
       let query = "";
 
-      // For GET requests (all actions except "add")
       if (action === 'manage' || action === 'filter' || action === 'edit' ||
           action === 'delete' || action === 'lookupByName' || action === 'balanceRange') {
         if (action === 'manage') {
@@ -151,7 +140,6 @@
           query = '?action=balanceRange&min=' + encodeURIComponent(balanceMin) +
                   '&max=' + encodeURIComponent(balanceMax);
         }
-        // Append timestamp to bypass cache.
         query += '&_=' + new Date().getTime();
         fetch("http://localhost:18080/api/customers" + query, { cache: "no-store" })
           .then(response => response.json())
@@ -167,8 +155,8 @@
             resultsSection.style.display = 'block';
             resultsDiv.innerHTML = '<p>Error retrieving data: ' + error + '</p>';
           });
+
       } else if (action === 'add') {
-        // For adding a customer via POST.
         const addName = document.getElementById('addName').value;
         const addEmail = document.getElementById('addEmail').value;
         const addAddress = document.getElementById('addAddress').value;
@@ -190,15 +178,20 @@
         .then(response => response.json())
         .then(data => {
           resultsSection.style.display = 'block';
-          resultsDiv.innerHTML = '<p>' + JSON.stringify(data, null, 2) + '</p>';
-          // Refresh the list after a short delay.
-          setTimeout(() => {
+          resultsDiv.innerHTML = `
+            <p>Customer added successfully.</p>
+            <button id="viewAllBtn" class="cta-button">View All Customers</button>
+          `;
+          document.getElementById('viewAllBtn').addEventListener('click', () => {
             fetch("http://localhost:18080/api/customers?action=manage&_=" + new Date().getTime(), { cache: "no-store" })
               .then(response => response.json())
               .then(data => {
                 resultsDiv.innerHTML = buildTable(data);
+              })
+              .catch(err => {
+                resultsDiv.innerHTML = '<p>Error retrieving customers: ' + err + '</p>';
               });
-          }, 1000);
+          });
         })
         .catch(error => {
           resultsSection.style.display = 'block';
@@ -208,14 +201,13 @@
         resultsDiv.innerHTML = '<p>Please select a valid action.</p>';
       }
     });
+  </script>
 
-  <!-- Load the common navbar and its JavaScript -->
   <script>
     fetch('/static/navbar.html')
       .then(response => response.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
-        // Now load the navbar script.
         const script = document.createElement('script');
         script.src = '/static/navbar.js';
         document.body.appendChild(script);
