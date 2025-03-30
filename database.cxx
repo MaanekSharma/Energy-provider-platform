@@ -108,16 +108,52 @@ void Database::generateBill(int customer_id, double amount, const std::string& d
 }
 
 void Database::checkOverduePayments(const std::string& today) {
-    std::string sql =
-        "INSERT INTO At_Risk_Customers (customer_id, risk_amount) "
+    // 1. Insert into At_Risk_Customers
+    std::string insertSQL =
+        "INSERT OR REPLACE INTO At_Risk_Customers (customer_id, risk_amount) "
         "SELECT customer_id, amount FROM Bills "
         "WHERE status != 'Paid' AND julianday(?) - julianday(due_date) > 30;";
 
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, today.c_str(), -1, SQLITE_TRANSIENT);
-        if (sqlite3_step(stmt) != SQLITE_DONE)
+    sqlite3_stmt* insertStmt = nullptr;
+    if (sqlite3_prepare_v2(db, insertSQL.c_str(), -1, &insertStmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(insertStmt, 1, today.c_str(), -1, SQLITE_TRANSIENT);
+        if (sqlite3_step(insertStmt) != SQLITE_DONE)
             std::cerr << "Insert failed: " << sqlite3_errmsg(db) << std::endl;
+    }
+    sqlite3_finalize(insertStmt);
+
+    // 2. Update Bills table with 'Overdue' status
+    std::string updateSQL =
+        "UPDATE Bills SET status = 'Overdue' "
+        "WHERE status != 'Paid' AND julianday(?) - julianday(due_date) > 30;";
+    
+    sqlite3_stmt* updateStmt = nullptr;
+    if (sqlite3_prepare_v2(db, updateSQL.c_str(), -1, &updateStmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(updateStmt, 1, today.c_str(), -1, SQLITE_TRANSIENT);
+        if (sqlite3_step(updateStmt) != SQLITE_DONE)
+            std::cerr << "Update failed: " << sqlite3_errmsg(db) << std::endl;
+    }
+    sqlite3_finalize(updateStmt);
+}
+
+void Database::generateFullBill(int customer_id, double amount, const std::string& due_date,
+                                const std::string& paid_date, const std::string& status) {
+    sqlite3_stmt* stmt = nullptr;
+    std::string sql = "INSERT INTO Bills (customer_id, amount, due_date, paid_date, status) VALUES (?, ?, ?, ?, ?);";
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_int(stmt, 1, customer_id);
+        sqlite3_bind_double(stmt, 2, amount);
+        sqlite3_bind_text(stmt, 3, due_date.c_str(), -1, SQLITE_TRANSIENT);
+        if (paid_date.empty())
+            sqlite3_bind_null(stmt, 4);
+        else
+            sqlite3_bind_text(stmt, 4, paid_date.c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 5, status.c_str(), -1, SQLITE_TRANSIENT);
+        if (sqlite3_step(stmt) != SQLITE_DONE)
+            std::cerr << "Bill insert failed: " << sqlite3_errmsg(db) << std::endl;
     }
     sqlite3_finalize(stmt);
 }
+
+
+

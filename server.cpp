@@ -268,7 +268,7 @@ int main() {
     });
 
     CROW_ROUTE(app, "/api/emailReminder")
-    ([db](const crow::request& req) {
+    ([&app, db](const crow::request& req) {
         auto idParam = req.url_params.get("customer_id");
         crow::json::wvalue res;
 
