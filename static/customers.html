@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Manage Customers - EnergyPro</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customers - EnergyPro</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- Navigation Bar -->
   <nav class="navbar">
-    <div class="logo">EnergyPro</div>
+    <a href="index.html" class="logo">EnergyPro</a>
     <ul>
       <li><a href="index.html">Dashboard</a></li>
       <li><a href="customers.html" class="active">Customers</a></li>
@@ -23,72 +23,200 @@
   <!-- Page Header -->
   <header class="page-header">
     <h1>Customer Management</h1>
-    <p>Manage your customers: add, delete, and update customer information.</p>
+    <p>Select an action below to manage customer records.</p>
   </header>
   
-  <!-- Customers Table Section -->
-  <section class="customer-table-section">
-    <h2>Customers List</h2>
-    <table class="customer-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Region</th>
-          <th>Balance</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Sample data rows -->
-        <tr>
-          <td>1</td>
-          <td>John Doe</td>
-          <td>Region1</td>
-          <td>$123.45</td>
-          <td>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-          </td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Jane Smith</td>
-          <td>Region2</td>
-          <td>$234.56</td>
-          <td>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-          </td>
-        </tr>
-        <!-- More rows can be added dynamically -->
-      </tbody>
-    </table>
+  <!-- Action Form Section -->
+  <section class="customer-action-section">
+    <h2>Choose an Action</h2>
+    <form id="customerActionForm">
+      <div class="form-group">
+        <label for="actionType">Action:</label>
+        <select id="actionType" name="actionType" required>
+          <option value="">-- Select an action --</option>
+          <option value="manage">Manage All Customers</option>
+          <option value="filter">Filter Customers by Region (Region_ID)</option>
+          <option value="edit">Lookup Customer by ID (for edit)</option>
+          <option value="delete">Delete Customer (by ID)</option>
+          <option value="lookupByName">Lookup Customer by Name</option>
+          <option value="balanceRange">Filter by Balance Range</option>
+          <option value="add">Add Customer</option>
+        </select>
+      </div>
+      <!-- Fields for filtering, lookup, etc. -->
+      <div class="form-group" id="regionFilterField" style="display:none;">
+        <label for="region">Region_ID:</label>
+        <input type="number" id="region" name="region" placeholder="Enter region ID">
+      </div>
+      <div class="form-group" id="customerIdField" style="display:none;">
+        <label for="customerId">Customer ID:</label>
+        <input type="number" id="customerId" name="customerId" placeholder="Enter customer ID">
+      </div>
+      <div class="form-group" id="nameLookupField" style="display:none;">
+        <label for="nameLookup">Name (partial):</label>
+        <input type="text" id="nameLookup" name="nameLookup" placeholder="Enter name">
+      </div>
+      <div class="form-group" id="balanceRangeField" style="display:none;">
+        <label for="balanceMin">Min Balance:</label>
+        <input type="number" step="0.01" id="balanceMin" name="balanceMin" placeholder="Minimum balance">
+        <label for="balanceMax">Max Balance:</label>
+        <input type="number" step="0.01" id="balanceMax" name="balanceMax" placeholder="Maximum balance">
+      </div>
+      <!-- Fields for adding a customer -->
+      <div class="form-group" id="addCustomerFields" style="display:none;">
+        <label for="addName">Name:</label>
+        <input type="text" id="addName" name="addName" placeholder="Enter customer name">
+        <label for="addEmail">Email:</label>
+        <input type="email" id="addEmail" name="addEmail" placeholder="Enter customer email">
+        <label for="addAddress">Address:</label>
+        <input type="text" id="addAddress" name="addAddress" placeholder="Enter address">
+        <label for="addRegionId">Region_ID:</label>
+        <input type="number" id="addRegionId" name="addRegionId" placeholder="Enter region ID">
+      </div>
+      <button type="submit" class="cta-button">Submit</button>
+    </form>
   </section>
   
-  <!-- Add Customer Form Section -->
-  <section class="customer-form-section">
-    <h2>Add New Customer</h2>
-    <form id="addCustomerForm">
-      <div class="form-group">
-        <label for="customerName">Name:</label>
-        <input type="text" id="customerName" name="customerName" placeholder="Enter customer name" required>
-      </div>
-      <div class="form-group">
-        <label for="customerRegion">Region:</label>
-        <input type="text" id="customerRegion" name="customerRegion" placeholder="Enter customer region" required>
-      </div>
-      <div class="form-group">
-        <label for="customerBalance">Balance:</label>
-        <input type="number" step="0.01" id="customerBalance" name="customerBalance" placeholder="Enter balance" required>
-      </div>
-      <button type="submit" class="cta-button">Add Customer</button>
-    </form>
+  <!-- Results Section -->
+  <section class="customer-results-section" style="display:none;">
+    <h2>Results</h2>
+    <div id="results"></div>
   </section>
   
   <!-- Footer -->
   <footer>
     <p>&copy; 2025 EnergyPro. All rights reserved.</p>
   </footer>
+  
+  <!-- JavaScript for Interactive Functionality -->
+  <script>
+    const actionSelect = document.getElementById('actionType');
+    const regionField = document.getElementById('regionFilterField');
+    const customerIdField = document.getElementById('customerIdField');
+    const nameLookupField = document.getElementById('nameLookupField');
+    const balanceRangeField = document.getElementById('balanceRangeField');
+    const addCustomerFields = document.getElementById('addCustomerFields');
+    const form = document.getElementById('customerActionForm');
+    const resultsSection = document.querySelector('.customer-results-section');
+    const resultsDiv = document.getElementById('results');
+
+    // Show/hide fields based on selected action
+    actionSelect.addEventListener('change', function() {
+      const action = actionSelect.value;
+      regionField.style.display = (action === 'filter') ? 'block' : 'none';
+      customerIdField.style.display = (action === 'edit' || action === 'delete') ? 'block' : 'none';
+      nameLookupField.style.display = (action === 'lookupByName') ? 'block' : 'none';
+      balanceRangeField.style.display = (action === 'balanceRange') ? 'block' : 'none';
+      addCustomerFields.style.display = (action === 'add') ? 'block' : 'none';
+    });
+
+    // Function to build an HTML table from JSON array data
+    function buildTable(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        return "<p>No records found.</p>";
+      }
+      let table = "<table class='customer-table'><thead><tr>";
+      const keys = Object.keys(data[0]);
+      keys.forEach(key => { table += "<th>" + key + "</th>"; });
+      table += "<th>Actions</th></tr></thead><tbody>";
+      data.forEach(record => {
+        table += "<tr>";
+        keys.forEach(key => {
+          table += "<td>" + record[key] + "</td>";
+        });
+        table += "<td><!-- Action buttons can go here --></td>";
+        table += "</tr>";
+      });
+      table += "</tbody></table>";
+      return table;
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      resultsDiv.innerHTML = '';
+      resultsSection.style.display = 'none';
+
+      const action = actionSelect.value;
+      let query = "";
+
+      // For GET requests (all actions except "add")
+      if (action === 'manage' || action === 'filter' || action === 'edit' ||
+          action === 'delete' || action === 'lookupByName' || action === 'balanceRange') {
+        if (action === 'manage') {
+          query = '?action=manage';
+        } else if (action === 'filter') {
+          const region = document.getElementById('region').value;
+          query = '?action=filter&region=' + encodeURIComponent(region);
+        } else if (action === 'edit' || action === 'delete') {
+          const customerId = document.getElementById('customerId').value;
+          query = '?action=' + action + '&id=' + encodeURIComponent(customerId);
+        } else if (action === 'lookupByName') {
+          const nameLookup = document.getElementById('nameLookup').value;
+          query = '?action=lookupByName&name=' + encodeURIComponent(nameLookup);
+        } else if (action === 'balanceRange') {
+          const balanceMin = document.getElementById('balanceMin').value;
+          const balanceMax = document.getElementById('balanceMax').value;
+          query = '?action=balanceRange&min=' + encodeURIComponent(balanceMin) +
+                  '&max=' + encodeURIComponent(balanceMax);
+        }
+        // Append timestamp to bypass cache.
+        query += '&_=' + new Date().getTime();
+        fetch("http://localhost:18080/api/customers" + query, { cache: "no-store" })
+          .then(response => response.json())
+          .then(data => {
+            resultsSection.style.display = 'block';
+            if (Array.isArray(data)) {
+              resultsDiv.innerHTML = buildTable(data);
+            } else {
+              resultsDiv.innerHTML = '<p>' + JSON.stringify(data, null, 2) + '</p>';
+            }
+          })
+          .catch(error => {
+            resultsSection.style.display = 'block';
+            resultsDiv.innerHTML = '<p>Error retrieving data: ' + error + '</p>';
+          });
+      } else if (action === 'add') {
+        // For adding a customer via POST.
+        const addName = document.getElementById('addName').value;
+        const addEmail = document.getElementById('addEmail').value;
+        const addAddress = document.getElementById('addAddress').value;
+        const addRegionId = document.getElementById('addRegionId').value;
+        const newCustomer = {
+          Name: addName,
+          Email: addEmail,
+          Address: addAddress,
+          Region_ID: parseInt(addRegionId)
+        };
+
+        fetch("http://localhost:18080/api/customers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(newCustomer)
+        })
+        .then(response => response.json())
+        .then(data => {
+          resultsSection.style.display = 'block';
+          resultsDiv.innerHTML = '<p>' + JSON.stringify(data, null, 2) + '</p>';
+          // Refresh the list after a short delay.
+          setTimeout(() => {
+            fetch("http://localhost:18080/api/customers?action=manage&_=" + new Date().getTime(), { cache: "no-store" })
+              .then(response => response.json())
+              .then(data => {
+                resultsDiv.innerHTML = buildTable(data);
+              });
+          }, 1000);
+        })
+        .catch(error => {
+          resultsSection.style.display = 'block';
+          resultsDiv.innerHTML = '<p>Error adding customer: ' + error + '</p>';
+        });
+      } else {
+        resultsDiv.innerHTML = '<p>Please select a valid action.</p>';
+      }
+    });
+  </script>
 </body>
 </html>

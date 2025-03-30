@@ -285,3 +285,55 @@ footer {
   color: #2ecc71;
 }
 
+/* Customer Action Form Enhancements */
+.customer-action-section {
+  padding: 2em;
+  background-color: #1f1f1f;
+  margin: 2em auto;
+  max-width: 600px;
+  border: 1px solid #2ecc71;
+  border-radius: 8px;
+}
+
+.customer-action-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.customer-action-section .form-group input,
+.customer-action-section .form-group select,
+.customer-action-section .form-group textarea {
+  width: 100%;
+  padding: 0.8em;
+  border: 1px solid #2ecc71;
+  border-radius: 4px;
+  background-color: #121212;
+  color: #fff;
+}
+
+.customer-action-section .form-group input:focus,
+.customer-action-section .form-group select:focus,
+.customer-action-section .form-group textarea:focus {
+  outline: none;
+  border-color: #27ae60;
+}
+
+/* JSON Result Container Styling */
+.customer-results-section {
+  padding: 2em;
+  background-color: #1f1f1f;
+  margin: 2em auto;
+  max-width: 800px;
+  border: 1px solid #2ecc71;
+  border-radius: 8px;
+}
+
+.customer-results-section pre {
+  background-color: #121212;
+  color: #fff;
+  padding: 1em;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+}

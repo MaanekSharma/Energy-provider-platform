@@ -2,112 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Billing - EnergyPro</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .status-paid { color: green; }
+    .status-unpaid { color: orange; }
+    .status-overdue { color: red; font-weight: bold; }
+    .billing-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .billing-table th, .billing-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    .billing-table th { background-color: #f4f4f4; }
+    .email-button { padding: 4px 10px; background-color: #007bff; color: #fff; border: none; cursor: pointer; }
+    .email-button:disabled { background-color: #ccc; cursor: not-allowed; }
+  </style>
 </head>
 <body>
-  <!-- Navigation Bar -->
   <nav class="navbar">
-    <a href="index.html" class="logo">EnergyPro</a>
+    <a href="#" class="logo">EnergyPro</a>
     <ul>
-      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="#">Dashboard</a></li>
       <li><a href="customers.html">Customers</a></li>
-      <li><a href="sales.html">Sales</a></li>
+      <li><a href="#">Sales</a></li>
       <li><a href="billing.html" class="active">Billing</a></li>
-      <li><a href="reports.html">Reports</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="#">Reports</a></li>
+      <li><a href="#">Contact</a></li>
     </ul>
   </nav>
-  
-  <!-- Page Header -->
+
   <header class="page-header">
-    <h1>Billing Management</h1>
-    <p>Manage billing records, invoice generation, and payment statuses.</p>
+    <h1>Billing Dashboard</h1>
+    <p>View and manage billing records across all customers.</p>
   </header>
-  
-  <!-- Billing Table Section -->
-  <section class="billing-table-section">
-    <h2>Billing Records</h2>
-    <table class="billing-table">
-      <thead>
-        <tr>
-          <th>Bill ID</th>
-          <th>Customer</th>
-          <th>Billing Date</th>
-          <th>Due Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Sample Billing Row 1 -->
-        <tr>
-          <td>1</td>
-          <td>John Doe</td>
-          <td>2025-01-10</td>
-          <td>2025-02-10</td>
-          <td>$3,000</td>
-          <td>Paid</td>
-          <td>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-          </td>
-        </tr>
-        <!-- Sample Billing Row 2 -->
-        <tr>
-          <td>2</td>
-          <td>Jane Smith</td>
-          <td>2025-02-05</td>
-          <td>2025-03-05</td>
-          <td>$4,500</td>
-          <td>Overdue</td>
-          <td>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-          </td>
-        </tr>
-        <!-- Additional rows can be dynamically generated -->
-      </tbody>
-    </table>
+
+  <section>
+    <label for="statusFilter">Filter by status:</label>
+    <select id="statusFilter">
+      <option value="">All</option>
+      <option value="Paid">Paid</option>
+      <option value="Unpaid">Unpaid</option>
+      <option value="Overdue">Overdue</option>
+    </select>
+    <button onclick="loadBills()">Apply</button>
+
+    <div id="billingTableContainer"></div>
   </section>
-  
-  <!-- Add Billing Form Section -->
-  <section class="billing-form-section">
-    <h2>Add New Billing Record</h2>
-    <form id="addBillingForm">
-      <div class="form-group">
-        <label for="billingCustomer">Customer:</label>
-        <input type="text" id="billingCustomer" name="billingCustomer" placeholder="Enter customer name" required>
-      </div>
-      <div class="form-group">
-        <label for="billingDate">Billing Date:</label>
-        <input type="date" id="billingDate" name="billingDate" required>
-      </div>
-      <div class="form-group">
-        <label for="dueDate">Due Date:</label>
-        <input type="date" id="dueDate" name="dueDate" required>
-      </div>
-      <div class="form-group">
-        <label for="billingAmount">Amount:</label>
-        <input type="number" step="0.01" id="billingAmount" name="billingAmount" placeholder="Enter amount" required>
-      </div>
-      <div class="form-group">
-        <label for="billingStatus">Status:</label>
-        <select id="billingStatus" name="billingStatus" required>
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Overdue">Overdue</option>
-        </select>
-      </div>
-      <button type="submit" class="cta-button">Add Billing Record</button>
-    </form>
-  </section>
-  
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 EnergyPro. All rights reserved.</p>
-  </footer>
+
+  <script>
+    function loadBills() {
+      const status = document.getElementById("statusFilter").value;
+      let url = "http://localhost:18080/api/bills";
+      if (status) url += `?status=${encodeURIComponent(status)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const bills = data.bills || [];
+          let html = "<table class='billing-table'><thead><tr>" +
+                     "<th>Bill ID</th><th>Customer ID</th><th>Amount</th>" +
+                     "<th>Due Date</th><th>Paid Date</th><th>Status</th><th>Action</th>" +
+                     "</tr></thead><tbody>";
+
+          if (bills.length === 0) {
+            html += "<tr><td colspan='7'>No bills found.</td></tr>";
+          } else {
+            bills.forEach(bill => {
+              let statusClass = bill.status.toLowerCase();
+              html += `<tr>
+                <td>${bill.bill_id}</td>
+                <td>${bill.customer_id}</td>
+                <td>$${bill.amount.toFixed(2)}</td>
+                <td>${bill.due_date}</td>
+                <td>${bill.paid_date || "-"}</td>
+                <td class='status-${statusClass}'>${bill.status}</td>
+                <td>${bill.status === "Overdue" ? 
+                      `<button class='email-button' onclick='sendReminder(${bill.customer_id})'>Send Reminder</button>` 
+                      : "-"}</td>
+              </tr>`;
+            });
+          }
+
+          html += "</tbody></table>";
+          document.getElementById("billingTableContainer").innerHTML = html;
+        });
+    }
+
+    function sendReminder(customerId) {
+      fetch(`http://localhost:18080/api/emailReminder?customer_id=${customerId}`)
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message || "Reminder sent.");
+        })
+        .catch(err => {
+          alert("Failed to send reminder: " + err);
+        });
+    }
+
+    window.onload = loadBills;
+  </script>
 </body>
 </html>
