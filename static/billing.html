@@ -16,18 +16,11 @@
   </style>
 </head>
 <body>
-  <nav class="navbar">
-    <a href="#" class="logo">EnergyPro</a>
-    <ul>
-      <li><a href="#">Dashboard</a></li>
-      <li><a href="customers.html">Customers</a></li>
-      <li><a href="#">Sales</a></li>
-      <li><a href="billing.html" class="active">Billing</a></li>
-      <li><a href="#">Reports</a></li>
-      <li><a href="#">Contact</a></li>
-    </ul>
-  </nav>
 
+  <!-- Navigation Bar -->
+  <div id="navbar-placeholder"></div>
+  
+  <!-- Page Header -->
   <header class="page-header">
     <h1>Billing Dashboard</h1>
     <p>View and manage billing records across all customers.</p>
@@ -97,6 +90,56 @@
     }
 
     window.onload = loadBills;
+  
+  <!-- Add Billing Form Section -->
+  <section class="billing-form-section">
+    <h2>Add New Billing Record</h2>
+    <form id="addBillingForm">
+      <div class="form-group">
+        <label for="billingCustomer">Customer:</label>
+        <input type="text" id="billingCustomer" name="billingCustomer" placeholder="Enter customer name" required>
+      </div>
+      <div class="form-group">
+        <label for="billingDate">Billing Date:</label>
+        <input type="date" id="billingDate" name="billingDate" required>
+      </div>
+      <div class="form-group">
+        <label for="dueDate">Due Date:</label>
+        <input type="date" id="dueDate" name="dueDate" required>
+      </div>
+      <div class="form-group">
+        <label for="billingAmount">Amount:</label>
+        <input type="number" step="0.01" id="billingAmount" name="billingAmount" placeholder="Enter amount" required>
+      </div>
+      <div class="form-group">
+        <label for="billingStatus">Status:</label>
+        <select id="billingStatus" name="billingStatus" required>
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+      </div>
+      <button type="submit" class="cta-button">Add Billing Record</button>
+    </form>
+  </section>
+  
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 EnergyPro. All rights reserved.</p>
+  </footer>
+
+  <!-- Load the common navbar and its JavaScript -->
+  <script>
+    fetch('/static/navbar.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+        // Now load the navbar script.
+        const script = document.createElement('script');
+        script.src = '/static/navbar.js';
+        document.body.appendChild(script);
+      })
+      .catch(err => console.error("Failed to load navbar:", err));
   </script>
 </body>
 </html>

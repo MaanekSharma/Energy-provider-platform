@@ -337,3 +337,100 @@ footer {
   overflow-x: auto;
   font-family: 'Courier New', monospace;
 }
+=======
+/* Modal container (covers entire screen) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal content box */
+.modal-content {
+  background-color: #121212;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #2ecc71;
+  width: 360px;
+  max-width: 80%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  color: #fff;
+}
+
+/* Close button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Modal form styles */
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8em;
+  margin: 0.5em 0;
+  border: 1px solid #2ecc71;
+  border-radius: 4px;
+  background-color: #1f1f1f;
+  color: #fff;
+}
+
+.modal-content button.cta-button {
+  width: 100%;
+  margin-top: 1em;
+}
+
+#login-error {
+  color: red;
+  display: none;
+  margin-top: 0.5em;
+}
+
+/* Toast notifications */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #2ecc71;
+  color: #121212;
+  padding: 1em 1.5em;
+  border-radius: 5px;
+  font-size: 1em;
+  opacity: 0;
+  animation: fadein 0.5s forwards, fadeout 0.5s 2.5s forwards;
+  z-index: 2000;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
