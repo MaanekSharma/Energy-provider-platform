@@ -8,17 +8,7 @@
 </head>
 <body>
   <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="logo">EnergyPro</div>
-    <ul>
-      <li><a href="index.html">Dashboard</a></li>
-      <li><a href="customers.html" class="active">Customers</a></li>
-      <li><a href="sales.html">Sales</a></li>
-      <li><a href="billing.html">Billing</a></li>
-      <li><a href="reports.html">Reports</a></li>
-      <li><a href="contact.html">Contact</a></li>
-    </ul>
-  </nav>
+  <div id="navbar-placeholder"></div>
   
   <!-- Page Header -->
   <header class="page-header">
@@ -90,5 +80,19 @@
   <footer>
     <p>&copy; 2025 EnergyPro. All rights reserved.</p>
   </footer>
+
+  <!-- Load the common navbar and its JavaScript -->
+  <script>
+    fetch('/static/navbar.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+        // Now load the navbar script.
+        const script = document.createElement('script');
+        script.src = '/static/navbar.js';
+        document.body.appendChild(script);
+      })
+      .catch(err => console.error("Failed to load navbar:", err));
+  </script>
 </body>
 </html>
