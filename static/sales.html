@@ -5,113 +5,149 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sales - EnergyPro</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Navigation Bar -->
+  <!-- Navbar Placeholder -->
   <div id="navbar-placeholder"></div>
   
   <!-- Page Header -->
   <header class="page-header">
     <h1>Sales Management</h1>
-    <p>Monitor and record all sales transactions.</p>
+    <p>View revenue per product for a selected date range.</p>
   </header>
   
-  <!-- Sales Table Section -->
-  <section class="sales-table-section">
-    <h2>Sales Transactions</h2>
-    <table class="sales-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Customer</th>
-          <th>Product</th>
-          <th>Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Sample Sale Row 1 -->
-        <tr>
-          <td>1</td>
-          <td>John Doe</td>
-          <td>Solar Panel</td>
-          <td>2025-01-15</td>
-          <td>$5,000</td>
-          <td>Completed</td>
-          <td>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-          </td>
-        </tr>
-        <!-- Sample Sale Row 2 -->
-        <tr>
-          <td>2</td>
-          <td>Jane Smith</td>
-          <td>Crude Oil</td>
-          <td>2025-02-10</td>
-          <td>$7,500</td>
-          <td>Pending</td>
-          <td>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-          </td>
-        </tr>
-        <!-- Additional rows can be dynamically generated -->
-      </tbody>
-    </table>
+  <!-- Filter Section -->
+  <section class="sales-filter-section">
+    <h2>Filter Sales Data</h2>
+    <div class="filter-container">
+      <div class="filter-group">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="filter-group">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate">
+      </div>
+      <button id="filterBtn" class="cta-button">Apply Filter</button>
+    </div>
   </section>
   
-  <!-- Add Sale Form Section -->
-  <section class="sale-form-section">
-    <h2>Add New Sale</h2>
-    <form id="addSaleForm">
-      <div class="form-group">
-        <label for="saleCustomer">Customer:</label>
-        <input type="text" id="saleCustomer" name="saleCustomer" placeholder="Enter customer name" required>
-      </div>
-      <div class="form-group">
-        <label for="saleProduct">Product:</label>
-        <input type="text" id="saleProduct" name="saleProduct" placeholder="Enter product name" required>
-      </div>
-      <div class="form-group">
-        <label for="saleDate">Date:</label>
-        <input type="date" id="saleDate" name="saleDate" required>
-      </div>
-      <div class="form-group">
-        <label for="saleAmount">Amount:</label>
-        <input type="number" step="0.01" id="saleAmount" name="saleAmount" placeholder="Enter sale amount" required>
-      </div>
-      <div class="form-group">
-        <label for="saleStatus">Status:</label>
-        <select id="saleStatus" name="saleStatus" required>
-          <option value="Completed">Completed</option>
-          <option value="Pending">Pending</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
-      </div>
-      <button type="submit" class="cta-button">Add Sale</button>
-    </form>
+  <!-- Sales Chart Section -->
+  <section class="sales-chart-section">
+    <h2>Sales by Product</h2>
+    <canvas id="salesChart"></canvas>
   </section>
   
   <!-- Footer -->
   <footer>
     <p>&copy; 2025 EnergyPro. All rights reserved.</p>
   </footer>
-
+  
   <!-- Load the common navbar and its JavaScript -->
   <script>
     fetch('/static/navbar.html')
       .then(response => response.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
-        // Now load the navbar script.
         const script = document.createElement('script');
         script.src = '/static/navbar.js';
         document.body.appendChild(script);
       })
       .catch(err => console.error("Failed to load navbar:", err));
+  </script>
+  
+  <!-- JavaScript to fetch and render sales data -->
+  <script>
+    function loadSalesByProduct() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+      
+      // Construct the API URL with query parameters if dates are provided.
+      let url = 'http://127.0.0.1:18080/api/salesByProduct';
+      if (start && end) {
+        url += `?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`;
+      }
+      
+      fetch(url, { credentials: 'include' })
+        .then(response => response.json())
+        .then(data => {
+          const labels = [];
+          const revenues = [];
+          data.data.forEach(item => {
+            labels.push(item.product);
+            revenues.push(item.revenue); // using revenue field from the query
+          });
+          renderSalesChart(labels, revenues);
+        })
+        .catch(err => console.error("Failed to fetch sales data:", err));
+    }
+    
+    function renderSalesChart(labels, salesData) {
+      // Destroy previous chart instance if it exists
+      if (window.salesChart && typeof window.salesChart.destroy === 'function') {
+        window.salesChart.destroy();
+      }
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      
+      const colors = [
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+        'rgba(199, 199, 199, 0.5)',
+        'rgba(83, 102, 255, 0.5)',
+        'rgba(255, 99, 71, 0.5)',
+        'rgba(60, 179, 113, 0.5)'
+      ];
+      const borderColors = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(199, 199, 199, 1)',
+        'rgba(83, 102, 255, 1)',
+        'rgba(255, 99, 71, 1)',
+        'rgba(60, 179, 113, 1)'
+      ];
+      
+      // Generate color arrays matching the number of labels
+      const backgroundColors = labels.map((label, index) => colors[index % colors.length]);
+      const borderColorsArray = labels.map((label, index) => borderColors[index % borderColors.length]);
+      
+      window.salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Revenue ($)',
+            data: salesData,
+            backgroundColor: backgroundColors,
+            borderColor: borderColorsArray,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          },
+          plugins: {
+            legend: {
+              display: false 
+            }
+          }
+        }
+      });
+    }
+    
+    document.getElementById("filterBtn").addEventListener("click", loadSalesByProduct);
+    window.addEventListener('load', loadSalesByProduct);
   </script>
 </body>
 </html>
