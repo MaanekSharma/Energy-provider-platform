@@ -3,95 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reports - EnergyPro</title>
+  <title>EnergyPro Reports</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <!-- Navigation Bar -->
   <div id="navbar-placeholder"></div>
-  
-  <!-- Page Header -->
-  <header class="page-header">
-    <h1>Reports</h1>
-    <p>Review key performance indicators and trends.</p>
-  </header>
-  
-  <!-- Reports Table Section -->
-  <section class="reports-section">
-    <h2>Monthly Summary Report</h2>
-    <table class="reports-table">
-      <thead>
-        <tr>
-          <th>Month</th>
-          <th>Total Sales</th>
-          <th>Total Billing</th>
-          <th>Outstanding Payments</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Sample Report Row 1 -->
-        <tr>
-          <td>January 2025</td>
-          <td>$50,000</td>
-          <td>$40,000</td>
-          <td>$5,000</td>
-          <td>Good performance</td>
-        </tr>
-        <!-- Sample Report Row 2 -->
-        <tr>
-          <td>February 2025</td>
-          <td>$45,000</td>
-          <td>$42,000</td>
-          <td>$3,000</td>
-          <td>Improved billing process</td>
-        </tr>
-        <!-- Additional rows can be dynamically generated -->
-      </tbody>
-    </table>
-  </section>
-  
-  <!-- Reports Form Section -->
-  <section class="reports-form-section">
-    <h2>Generate Custom Report</h2>
-    <form id="customReportForm">
-      <div class="form-group">
-        <label for="reportStartDate">Start Date:</label>
-        <input type="date" id="reportStartDate" name="reportStartDate" required>
-      </div>
-      <div class="form-group">
-        <label for="reportEndDate">End Date:</label>
-        <input type="date" id="reportEndDate" name="reportEndDate" required>
-      </div>
-      <div class="form-group">
-        <label for="reportType">Report Type:</label>
-        <select id="reportType" name="reportType" required>
-          <option value="sales">Sales</option>
-          <option value="billing">Billing</option>
-          <option value="both">Both</option>
-        </select>
-      </div>
-      <button type="submit" class="cta-button">Generate Report</button>
-    </form>
-  </section>
-  
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 EnergyPro. All rights reserved.</p>
-  </footer>
 
-  <!-- Load the common navbar and its JavaScript -->
+  <!-- Reports Dashboard -->
+  <main class="dashboard">
+    <h1>Reports</h1>
+
+    <div class="row">
+      <!-- Revenue by Region -->
+      <section class="card">
+        <h2>Revenue by Region</h2>
+        <canvas id="revenueChart"></canvas>
+        <div class="number-box" id="revenueTotal">$0</div>
+      </section>
+
+      <!-- Overdue by Region -->
+      <section class="card">
+        <h2>Overdue Amount by Region</h2>
+        <canvas id="overdueRegionChart"></canvas>
+        <div class="number-box" id="overdueTotal">$0</div>
+      </section>
+    </div>
+
+    <div class="row">
+      <!-- Bill Status Breakdown -->
+      <section class="card">
+        <h2>Bill Status Breakdown</h2>
+        <canvas id="billStatusChart"></canvas>
+      </section>
+
+      <!-- Import/Export Expenses -->
+      <section class="card">
+        <h2>Import/Export Expenses</h2>
+        <div class="canvas-wrapper">
+          <canvas id="expenseChart"></canvas>
+          <div class="chart-center-text" id="expenseTotalText">$0</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Load navbar -->
   <script>
     fetch('/static/navbar.html')
-      .then(response => response.text())
+      .then(res => res.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
-        // Now load the navbar script.
         const script = document.createElement('script');
         script.src = '/static/navbar.js';
         document.body.appendChild(script);
-      })
-      .catch(err => console.error("Failed to load navbar:", err));
+      });
+  </script>
+
+  <!-- Fetch and Render Charts -->
+  <script>
+    fetch('/api/revenueByRegion?period=3m')
+      .then(res => res.json())
+      .then(data => {
+        const total = data.values.reduce((acc, val) => acc + val, 0);
+        document.getElementById('revenueTotal').innerText = `$${total.toLocaleString()}`;
+        new Chart(document.getElementById('revenueChart'), {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Revenue ($)',
+              backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#00e676'],
+              data: data.values
+            }]
+          }
+        });
+      });
+
+    // Bill Status Breakdown
+    fetch('/api/billStatusBreakdown')
+      .then(res => res.json())
+      .then(data => {
+        new Chart(document.getElementById('billStatusChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Paid', 'Unpaid', 'Overdue'],
+            datasets: [{
+              data: data.values,
+              backgroundColor: ['#4BC0C0', '#FFCE56', '#FF4C4C']
+            }]
+          }
+        });
+      });
+
+    // Overdue by Region and Total
+    fetch('/api/overdueByRegion')
+      .then(res => res.json())
+      .then(data => {
+        const total = data.values.reduce((acc, val) => acc + val, 0);
+        document.getElementById('overdueTotal').innerText = `$${total.toLocaleString()}`;
+        new Chart(document.getElementById('overdueRegionChart'), {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: 'Overdue ($)',
+              backgroundColor: '#FF4C4C',
+              data: data.values
+            }]
+          }
+        });
+      });
+
+    // Import/Export Expenses
+    fetch('/api/expensesByCommodity')
+      .then(res => res.json())
+      .then(data => {
+        const total = data.values.reduce((acc, val) => acc + val, 0);
+        document.getElementById('expenseTotalText').innerText = `$${total.toLocaleString()}`;
+        new Chart(document.getElementById('expenseChart'), {
+          type: 'doughnut',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              data: data.values,
+              backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+            }]
+          }
+        });
+      });
   </script>
 </body>
 </html>

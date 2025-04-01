@@ -65,9 +65,7 @@
       { href: 'customers.html', text: 'Customers' },
       { href: 'sales.html', text: 'Sales' },
       { href: 'billing.html', text: 'Billing' },
-      { href: 'reports.html', text: 'Reports' },
-      { href: 'contact.html', text: 'Contact' }
-    ];
+      { href: 'reports.html', text: 'Reports' },    ];
     links.forEach(link => {
       const li = document.createElement('li');
       li.innerHTML = `<a href="${link.href}">${link.text}</a>`;

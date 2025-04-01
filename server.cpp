@@ -242,6 +242,55 @@ int main() {
         res.write(result.dump());
         return res;
     });
+
+    CROW_ROUTE(app, "/api/billInfo")
+    ([db](const crow::request& req) {
+        auto customerParam = req.url_params.get("customer_id");
+        if (!customerParam) return crow::response(400, "Missing customer_id");
+
+        std::string sql =
+            "SELECT b.due_date, c.email "
+            "FROM Bills b "
+            "JOIN Customers c ON b.customer_id = c.customer_id "
+            "WHERE b.customer_id = ? AND b.status = 'Overdue' "
+            "ORDER BY b.due_date ASC LIMIT 1;";
+
+        sqlite3_stmt* stmt = nullptr;
+        crow::json::wvalue result;
+
+        if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, customerParam, -1, SQLITE_TRANSIENT);
+
+            if (sqlite3_step(stmt) == SQLITE_ROW) {
+                result["bill"]["due_date"] = (const char*)sqlite3_column_text(stmt, 0);
+                result["bill"]["email"] = (const char*)sqlite3_column_text(stmt, 1);
+            } else {
+                sqlite3_finalize(stmt);
+                crow::json::wvalue err;
+                err["error"] = "No overdue bill found for this customer.";
+                crow::response res(404);
+                res.set_header("Content-Type", "application/json");
+                res.write(err.dump());
+                return res;
+                            }
+        } else {
+            sqlite3_finalize(stmt);
+            crow::json::wvalue err;
+            err["error"] = "Query failed.";
+            crow::response res(500);
+            res.set_header("Content-Type", "application/json");
+            res.write(err.dump());
+            return res;
+
+        }
+
+        sqlite3_finalize(stmt);
+        crow::response r(200);
+        r.set_header("Content-Type", "application/json");
+        r.write(result.dump());
+        return r;
+    });
+
     
     // Route: Get regions.
     CROW_ROUTE(app, "/api/regions")
@@ -313,14 +362,15 @@ int main() {
         );
     });
     
-    // Admin Logout
     CROW_ROUTE(app, "/admin/logout")
     ([](){
-        crow::response res("<p>You have been logged out.</p>");
-        res.add_header("Set-Cookie", "admin_session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly");
-        res.set_header("Content-Type", "text/html");
-        return res;
+    crow::response res("<p>You have been logged out.</p>");
+    res.add_header("Set-Cookie", "admin_session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly");
+    res.set_header("Content-Type", "text/html");
+    return res;
     });
+
+
     
     // Route: Get sales data aggregated by product using revenue (from Bills)
     CROW_ROUTE(app, "/api/salesByProduct")
@@ -369,6 +419,144 @@ int main() {
         res.write(result.dump());
         return res;
     });
+
+    CROW_ROUTE(app, "/api/revenueByRegion")
+([db](const crow::request& req) {
+    std::string period = req.url_params.get("period") ? req.url_params.get("period") : "6m";
+
+    // Default to past 6 months
+    std::string cutoff = "2024-10-01"; // fallback
+    if (period == "1m") cutoff = "2025-03-01";
+    else if (period == "3m") cutoff = "2025-01-01";
+    else if (period == "6m") cutoff = "2024-10-01";
+
+    std::string sql =
+        "SELECT r.region_name, SUM(b.amount) AS total_revenue "
+        "FROM Bills b "
+        "JOIN Customers c ON b.customer_id = c.customer_id "
+        "JOIN Regions r ON c.region_id = r.region_id "
+        "WHERE b.status = 'Paid' AND b.paid_date >= ? "
+        "GROUP BY r.region_name;";
+
+    sqlite3_stmt* stmt = nullptr;
+    crow::json::wvalue result;
+    std::vector<std::string> labels;
+    std::vector<double> values;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, cutoff.c_str(), -1, SQLITE_TRANSIENT);
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            labels.emplace_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+            values.push_back(sqlite3_column_double(stmt, 1));
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    result["labels"] = labels;
+    result["values"] = values;
+    return crow::response{result};
+});
+
+
+// Overdue Total
+CROW_ROUTE(app, "/api/overdueTotal")
+([db]() {
+    std::string sql = "SELECT SUM(amount) FROM Bills WHERE status = 'Overdue';";
+    sqlite3_stmt* stmt = nullptr;
+    double total = 0.0;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            total = sqlite3_column_double(stmt, 0);
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    crow::json::wvalue result;
+    result["total"] = total;
+    return crow::response{result};
+});
+
+// Import/Export Expenses by Commodity
+CROW_ROUTE(app, "/api/expensesByCommodity")
+([db]() {
+    std::string sql =
+        "SELECT et.type_name, SUM(ie.import_cost) "
+        "FROM Imports_Exports ie "
+        "JOIN Energy_Types et ON ie.energy_type_id = et.energy_type_id "
+        "GROUP BY et.type_name;";
+
+    sqlite3_stmt* stmt = nullptr;
+    std::vector<std::string> labels;
+    std::vector<double> values;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            labels.emplace_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+            values.push_back(sqlite3_column_double(stmt, 1));
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    crow::json::wvalue result;
+    result["labels"] = labels;
+    result["values"] = values;
+    return crow::response{result};
+});
+
+    CROW_ROUTE(app, "/api/overdueByRegion")([db]() {
+    std::string sql =
+        "SELECT r.region_name, SUM(b.amount) AS overdue_amount "
+        "FROM Bills b "
+        "JOIN Customers c ON b.customer_id = c.customer_id "
+        "JOIN Regions r ON c.region_id = r.region_id "
+        "WHERE b.status = 'Overdue' "
+        "GROUP BY r.region_name;";
+
+    sqlite3_stmt* stmt = nullptr;
+    std::vector<std::string> labels;
+    std::vector<double> values;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            labels.emplace_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+            values.push_back(sqlite3_column_double(stmt, 1));
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    crow::json::wvalue result;
+    result["labels"] = labels;
+    result["values"] = values;
+    return crow::response{result};
+});
+
+CROW_ROUTE(app, "/api/billStatusBreakdown")
+([db]() {
+    std::string sql = "SELECT status, COUNT(*) FROM Bills GROUP BY status;";
+    sqlite3_stmt* stmt = nullptr;
+
+    int paid = 0, unpaid = 0, overdue = 0;
+
+    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string status = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            int count = sqlite3_column_int(stmt, 1);
+            if (status == "Paid") paid = count;
+            else if (status == "Unpaid") unpaid = count;
+            else if (status == "Overdue") overdue = count;
+        }
+    }
+    sqlite3_finalize(stmt);
+
+    crow::json::wvalue result;
+    result["values"] = crow::json::wvalue::list({paid, unpaid, overdue});
+    return crow::response{result};
+});
+
+
+
+
     
     app.port(18080).multithreaded().run();
     sqlite3_close(db);

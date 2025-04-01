@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sales - EnergyPro</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Chart.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -38,6 +37,7 @@
   <section class="sales-chart-section">
     <h2>Sales by Product</h2>
     <canvas id="salesChart"></canvas>
+    <div class="sales-total-box" id="salesTotal">$0</div>
   </section>
   
   <!-- Footer -->
@@ -45,7 +45,7 @@
     <p>&copy; 2025 EnergyPro. All rights reserved.</p>
   </footer>
   
-  <!-- Load the common navbar and its JavaScript -->
+  <!-- Load Navbar -->
   <script>
     fetch('/static/navbar.html')
       .then(response => response.text())
@@ -58,39 +58,35 @@
       .catch(err => console.error("Failed to load navbar:", err));
   </script>
   
-  <!-- JavaScript to fetch and render sales data -->
+  <!-- Fetch and Render Sales Chart -->
   <script>
     function loadSalesByProduct() {
       const start = document.getElementById("startDate").value;
       const end = document.getElementById("endDate").value;
       
-      // Construct the API URL with query parameters if dates are provided.
       let url = 'http://127.0.0.1:18080/api/salesByProduct';
       if (start && end) {
         url += `?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`;
       }
       
-      fetch(url, { credentials: 'include' })
+      fetch(url)
         .then(response => response.json())
         .then(data => {
-          const labels = [];
-          const revenues = [];
-          data.data.forEach(item => {
-            labels.push(item.product);
-            revenues.push(item.revenue); // using revenue field from the query
-          });
-          renderSalesChart(labels, revenues);
+          const labels = data.data.map(item => item.product);
+          const values = data.data.map(item => item.revenue);
+          const total = values.reduce((acc, val) => acc + val, 0);
+          document.getElementById('salesTotal').innerText = `$${total.toLocaleString()}`;
+          renderSalesChart(labels, values);
         })
         .catch(err => console.error("Failed to fetch sales data:", err));
     }
-    
-    function renderSalesChart(labels, salesData) {
-      // Destroy previous chart instance if it exists
+
+    function renderSalesChart(labels, values) {
       if (window.salesChart && typeof window.salesChart.destroy === 'function') {
         window.salesChart.destroy();
       }
+
       const ctx = document.getElementById('salesChart').getContext('2d');
-      
       const colors = [
         'rgba(255, 99, 132, 0.5)',
         'rgba(54, 162, 235, 0.5)',
@@ -103,30 +99,18 @@
         'rgba(255, 99, 71, 0.5)',
         'rgba(60, 179, 113, 0.5)'
       ];
-      const borderColors = [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)',
-        'rgba(199, 199, 199, 1)',
-        'rgba(83, 102, 255, 1)',
-        'rgba(255, 99, 71, 1)',
-        'rgba(60, 179, 113, 1)'
-      ];
-      
-      // Generate color arrays matching the number of labels
-      const backgroundColors = labels.map((label, index) => colors[index % colors.length]);
-      const borderColorsArray = labels.map((label, index) => borderColors[index % borderColors.length]);
-      
+      const borderColors = colors.map(c => c.replace('0.5', '1'));
+
+      const backgroundColors = labels.map((_, i) => colors[i % colors.length]);
+      const borderColorsArray = labels.map((_, i) => borderColors[i % borderColors.length]);
+
       window.salesChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
           datasets: [{
             label: 'Revenue ($)',
-            data: salesData,
+            data: values,
             backgroundColor: backgroundColors,
             borderColor: borderColorsArray,
             borderWidth: 1
@@ -138,16 +122,14 @@
             y: { beginAtZero: true }
           },
           plugins: {
-            legend: {
-              display: false 
-            }
+            legend: { display: false }
           }
         }
       });
     }
-    
+
     document.getElementById("filterBtn").addEventListener("click", loadSalesByProduct);
-    window.addEventListener('load', loadSalesByProduct);
+    window.addEventListener("load", loadSalesByProduct);
   </script>
 </body>
 </html>

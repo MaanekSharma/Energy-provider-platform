@@ -485,3 +485,279 @@ footer {
 .cta-button:hover {
   background-color: #27ae60;
 }
+/* Reports Dashboard Styling */
+.dashboard {
+  padding: 2em;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2em;
+  margin-bottom: 2em;
+}
+
+.card {
+  flex: 1 1 calc(50% - 2em);
+  background-color: #1f1f1f;
+  padding: 1em;
+  border: 1px solid #2ecc71;
+  border-radius: 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card h2 {
+  color: #2ecc71;
+  font-size: 1.25em;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+.card canvas {
+  max-width: 100%;
+  height: 250px;
+  margin: 0 auto;
+}
+
+.number-box {
+  margin-top: 1em;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #2ecc71;
+  text-align: center;
+  background-color: #121212;
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #2ecc71;
+}
+
+@media (max-width: 768px) {
+  .card {
+    flex: 1 1 100%;
+  }
+}
+
+/* Sales Page Chart Styling */
+.sales-chart-section {
+  padding: 2em;
+  background-color: #121212;
+}
+
+.sales-chart-section canvas {
+  display: block;
+  max-width: 100%;
+  height: 600px;
+  margin: 0 auto;
+}
+
+.sales-chart-section h2 {
+  color: #2ecc71;
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.sales-total-box {
+  text-align: center;
+  margin-top: 1em;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #2ecc71;
+  background-color: #121212;
+  padding: 0.5em;
+  border-radius: 4px;
+  border: 1px solid #2ecc71;
+}
+
+.sales-filter-section {
+  padding: 2em;
+  text-align: center;
+}
+
+.filter-container {
+  display: inline-flex;
+  align-items: center;
+  background-color: #1f1f1f;
+  border: 1px solid #2ecc71;
+  border-radius: 8px;
+  padding: 1em;
+  gap: 1em;
+  margin-top: 1em;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.filter-group label {
+  margin-bottom: 0.3em;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+.filter-group input[type="date"],
+.filter-group select {
+  padding: 0.5em;
+  border: 1px solid #2ecc71;
+  border-radius: 4px;
+  background-color: #121212;
+  color: #fff;
+}
+
+/* Match CTA button style for filter apply */
+button.cta-button, button {
+  padding: 0.8em 1.5em;
+  background-color: #2ecc71;
+  border: none;
+  color: #121212;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button.cta-button:hover, button:hover {
+  background-color: #27ae60;
+}
+
+/* Doughnut chart center text */
+.canvas-wrapper {
+  position: relative;
+}
+
+.canvas-wrapper .chart-center-text {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.1em;
+  color: #cc2e2e;
+  font-weight: bold;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* Billing Table Enhancements */
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.billing-table th, .billing-table td {
+  border: 1px solid #2ecc71;
+  padding: 8px;
+  text-align: center;
+}
+
+.billing-table th {
+  background-color: #1f1f1f;
+  color: #2ecc71;
+}
+
+.status-paid {
+  color: #2ecc71;
+}
+
+.status-unpaid {
+  color: #f39c12;
+}
+
+.status-overdue {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.email-button {
+  padding: 6px 12px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.email-button:disabled {
+  background-color: #777;
+  cursor: not-allowed;
+}
+
+.billing-filter-section {
+  padding: 2em;
+  text-align: center;
+}
+
+.billing-filter-section h2 {
+  color: #fff;
+  margin-bottom: 1em;
+}
+
+.billing-filter-section .filter-container {
+  display: inline-flex;
+  align-items: center;
+  background-color: #1f1f1f;
+  border: 1px solid #2ecc71;
+  border-radius: 8px;
+  padding: 1em;
+  gap: 1em;
+  margin-top: 1em;
+}
+
+.status-paid { color: green; }
+    .status-unpaid { color: orange; }
+    .status-overdue { color: red; font-weight: bold; }
+
+    .billing-filter-section {
+      padding: 2em;
+      text-align: center;
+    }
+
+    .billing-filter-section .filter-container {
+      display: inline-flex;
+      align-items: center;
+      background-color: #1f1f1f;
+      border: 1px solid #2ecc71;
+      border-radius: 8px;
+      padding: 1em;
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .filter-group label {
+      margin-bottom: 0.3em;
+      font-weight: bold;
+      color: #2ecc71;
+    }
+
+    .filter-group select {
+      padding: 0.6em;
+      background-color: #121212;
+      color: #fff;
+      border: 1px solid #2ecc71;
+      border-radius: 5px;
+    }
+
+    .email-button {
+      padding: 4px 10px;
+      background-color: #2ecc71;
+      color: #121212;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .email-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }

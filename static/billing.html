@@ -5,39 +5,111 @@
   <title>Billing - EnergyPro</title>
   <link rel="stylesheet" href="/static/style.css" />
   <style>
-    .status-paid { color: green; }
-    .status-unpaid { color: orange; }
-    .status-overdue { color: red; font-weight: bold; }
-    .billing-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .billing-table th, .billing-table td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    .billing-table th { background-color: #f4f4f4; }
-    .email-button { padding: 4px 10px; background-color: #007bff; color: #fff; border: none; cursor: pointer; }
-    .email-button:disabled { background-color: #ccc; cursor: not-allowed; }
+    .status-paid { color: #2ecc71; }
+    .status-unpaid { color: #f39c12; }
+    .status-overdue { color: #e74c3c; font-weight: bold; }
+
+    .billing-filter-section {
+      padding: 2em;
+      text-align: center;
+    }
+
+    .billing-filter-section h2 {
+      color: #fff;
+      margin-bottom: 1em;
+    }
+
+    .billing-filter-section .filter-container {
+      display: inline-flex;
+      align-items: center;
+      background-color: #1f1f1f;
+      border: 1px solid #2ecc71;
+      border-radius: 8px;
+      padding: 1em;
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .filter-group label {
+      margin-bottom: 0.3em;
+      font-weight: bold;
+      color: #2ecc71;
+    }
+
+    .filter-group select {
+      padding: 0.6em;
+      background-color: #121212;
+      color: #fff;
+      border: 1px solid #2ecc71;
+      border-radius: 5px;
+    }
+
+    .email-button {
+      padding: 6px 12px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .email-button:disabled {
+      background-color: #777;
+      cursor: not-allowed;
+    }
+
+    .billing-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .billing-table th, .billing-table td {
+      border: 1px solid #2ecc71;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .billing-table th {
+      background-color: #1f1f1f;
+      color: #2ecc71;
+    }
   </style>
 </head>
 <body>
 
   <!-- Navigation Bar -->
   <div id="navbar-placeholder"></div>
-  
+
   <!-- Page Header -->
   <header class="page-header">
     <h1>Billing Dashboard</h1>
     <p>View and manage billing records across all customers.</p>
   </header>
 
-  <section>
-    <label for="statusFilter">Filter by status:</label>
-    <select id="statusFilter">
-      <option value="">All</option>
-      <option value="Paid">Paid</option>
-      <option value="Unpaid">Unpaid</option>
-      <option value="Overdue">Overdue</option>
-    </select>
-    <button onclick="loadBills()">Apply</button>
-
-    <div id="billingTableContainer"></div>
+  <section class="billing-filter-section">
+    <h2>Filter Billing Data</h2>
+    <div class="filter-container">
+      <div class="filter-group">
+        <label for="statusFilter">Filter by status:</label>
+        <select id="statusFilter">
+          <option value="">All</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+      </div>
+      <button onclick="loadBills()" class="cta-button">Apply</button>
+    </div>
   </section>
+
+  <div id="billingTableContainer"></div>
 
   <script>
     function loadBills() {
@@ -79,51 +151,31 @@
     }
 
     function sendReminder(customerId) {
-      fetch(`http://localhost:18080/api/emailReminder?customer_id=${customerId}`)
+      fetch(`http://localhost:18080/api/billInfo?customer_id=${customerId}`)
         .then(res => res.json())
         .then(data => {
-          alert(data.message || "Reminder sent.");
+          const bill = data.bill;
+          if (!bill || !bill.email) return alert("Missing bill or email info.");
+
+          const overdueDate = new Date(bill.due_date);
+          const today = new Date();
+          const diffDays = Math.floor((today - overdueDate) / (1000 * 60 * 60 * 24));
+
+          const subject = encodeURIComponent("Overdue Bill Reminder");
+          const body = encodeURIComponent(
+            `This is a reminder that your bill is OVERDUE.\n\nDue Date: ${bill.due_date}\nOverdue by: ${diffDays} days.`
+          );
+
+          window.location.href = `mailto:${bill.email}?subject=${subject}&body=${body}`;
         })
         .catch(err => {
-          alert("Failed to send reminder: " + err);
+          alert("Failed to get bill info: " + err);
         });
     }
 
     window.onload = loadBills;
   </script>
 
-  <!-- Add Billing Form Section -->
-  <section class="billing-form-section">
-    <h2>Add New Billing Record</h2>
-    <form id="addBillingForm">
-      <div class="form-group">
-        <label for="billingCustomer">Customer:</label>
-        <input type="text" id="billingCustomer" name="billingCustomer" placeholder="Enter customer name" required>
-      </div>
-      <div class="form-group">
-        <label for="billingDate">Billing Date:</label>
-        <input type="date" id="billingDate" name="billingDate" required>
-      </div>
-      <div class="form-group">
-        <label for="dueDate">Due Date:</label>
-        <input type="date" id="dueDate" name="dueDate" required>
-      </div>
-      <div class="form-group">
-        <label for="billingAmount">Amount:</label>
-        <input type="number" step="0.01" id="billingAmount" name="billingAmount" placeholder="Enter amount" required>
-      </div>
-      <div class="form-group">
-        <label for="billingStatus">Status:</label>
-        <select id="billingStatus" name="billingStatus" required>
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Overdue">Overdue</option>
-        </select>
-      </div>
-      <button type="submit" class="cta-button">Add Billing Record</button>
-    </form>
-  </section>
-  
   <!-- Footer -->
   <footer>
     <p>&copy; 2025 EnergyPro. All rights reserved.</p>
@@ -135,12 +187,10 @@
       .then(response => response.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
-        // Now load the navbar script.
         const script = document.createElement('script');
         script.src = '/static/navbar.js';
         document.body.appendChild(script);
-      })
-      .catch(err => console.error("Failed to load navbar:", err));
+      });
   </script>
 </body>
 </html>

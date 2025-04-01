@@ -26,7 +26,6 @@
           <option value="edit">Lookup Customer by ID (for edit)</option>
           <option value="delete">Delete Customer (by ID)</option>
           <option value="lookupByName">Lookup Customer by Name</option>
-          <option value="balanceRange">Filter by Balance Range</option>
           <option value="add">Add Customer</option>
         </select>
       </div>
@@ -42,12 +41,6 @@
       <div class="form-group" id="nameLookupField" style="display:none;">
         <label for="nameLookup">Name (partial):</label>
         <input type="text" id="nameLookup" name="nameLookup" placeholder="Enter name">
-      </div>
-      <div class="form-group" id="balanceRangeField" style="display:none;">
-        <label for="balanceMin">Min Balance:</label>
-        <input type="number" step="0.01" id="balanceMin" name="balanceMin" placeholder="Minimum balance">
-        <label for="balanceMax">Max Balance:</label>
-        <input type="number" step="0.01" id="balanceMax" name="balanceMax" placeholder="Maximum balance">
       </div>
 
       <div class="form-group" id="addCustomerFields" style="display:none;">
@@ -78,7 +71,6 @@
     const regionField = document.getElementById('regionFilterField');
     const customerIdField = document.getElementById('customerIdField');
     const nameLookupField = document.getElementById('nameLookupField');
-    const balanceRangeField = document.getElementById('balanceRangeField');
     const addCustomerFields = document.getElementById('addCustomerFields');
     const form = document.getElementById('customerActionForm');
     const resultsSection = document.querySelector('.customer-results-section');
@@ -89,7 +81,6 @@
       regionField.style.display = (action === 'filter') ? 'block' : 'none';
       customerIdField.style.display = (action === 'edit' || action === 'delete') ? 'block' : 'none';
       nameLookupField.style.display = (action === 'lookupByName') ? 'block' : 'none';
-      balanceRangeField.style.display = (action === 'balanceRange') ? 'block' : 'none';
       addCustomerFields.style.display = (action === 'add') ? 'block' : 'none';
     });
 
@@ -122,7 +113,7 @@
       let query = "";
 
       if (action === 'manage' || action === 'filter' || action === 'edit' ||
-          action === 'delete' || action === 'lookupByName' || action === 'balanceRange') {
+          action === 'delete' || action === 'lookupByName') {
         if (action === 'manage') {
           query = '?action=manage';
         } else if (action === 'filter') {
@@ -134,11 +125,6 @@
         } else if (action === 'lookupByName') {
           const nameLookup = document.getElementById('nameLookup').value;
           query = '?action=lookupByName&name=' + encodeURIComponent(nameLookup);
-        } else if (action === 'balanceRange') {
-          const balanceMin = document.getElementById('balanceMin').value;
-          const balanceMax = document.getElementById('balanceMax').value;
-          query = '?action=balanceRange&min=' + encodeURIComponent(balanceMin) +
-                  '&max=' + encodeURIComponent(balanceMax);
         }
         query += '&_=' + new Date().getTime();
         fetch("http://localhost:18080/api/customers" + query, { cache: "no-store" })
